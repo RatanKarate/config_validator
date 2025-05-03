@@ -20,5 +20,7 @@ dependencies = [
 validate-config = "config_validator.runner:main"
 
 [tool.setuptools]
-packages = ["config_validator"]
+# Automatically find all packages with __init__.py
+[tool.setuptools.packages.find]
+where = ["."]
 

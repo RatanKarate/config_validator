@@ -1,0 +1,24 @@
+[project]
+name = "config_validator"
+version = "0.1.0"
+description = "Validator using FastAPI and gRPC"
+authors = [{ name = "Your Name" }]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "requests",
+    "pyyaml",
+    "cvprac",
+    "rich",
+    "grpcio==1.70.0",
+    "grpcio-status==1.59.0",
+    "grpcio-tools==1.59.0",
+    "protobuf==4.21.6",
+]
+
+[project.scripts]
+validate-config = "config_validator.runner:main"
+
+[tool.setuptools]
+packages = ["config_validator"]
+

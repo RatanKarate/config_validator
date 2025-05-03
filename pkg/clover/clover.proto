@@ -1,0 +1,526 @@
+syntax = "proto3";
+option go_package = "gitlab.aristanetworks.com/julioperez/arista-ci-uno/api/pkg/clover";
+enum Metric {
+    START = 0;
+    END = 1;
+    BYTES = 2;
+    PACKETS = 3;
+    DROPPED_BYTES = 4;
+    DROPPED_PACKETS = 5;
+    FLOWS = 6;
+    HOSTS = 7;
+    // DPS Path metrics are valid only for IPFIX data source
+    MIN_DPS_PATH_LATENCY = 8;
+    MAX_DPS_PATH_LATENCY = 9;
+    AVG_DPS_PATH_LATENCY = 10;
+    MIN_DPS_PATH_LOSS_RATE = 11;
+    MAX_DPS_PATH_LOSS_RATE = 12;
+    AVG_DPS_PATH_LOSS_RATE = 13;
+    MIN_LATENCY = 14;
+    MAX_LATENCY = 15;
+    AVG_LATENCY = 16;
+    CONGESTION = 17;
+}
+enum TunnelType {
+    UNKNOWN = 0;
+    VXLAN = 1;
+    GRE = 2;
+    IPIP = 3;
+    IPv6 = 4;
+}
+enum FlowDataSource {
+    IPFIX = 0;
+    INT = 1;
+}
+message SortMetric {
+    Metric metric = 1;
+    bool ascending = 2;
+}
+enum Operator {
+    LE = 0;
+    GE = 1;
+}
+message OperatorMetric {
+    Metric metric = 1;
+    Operator operator = 2;
+    uint32 value = 3;
+}
+enum ApplicationType {
+   ANY_APP = 0;
+   DPI_APP = 1;
+   SRC_APP = 2;
+   DST_APP = 3;
+}
+message Application {
+   string app_name = 1;
+   string app_category_name = 2;
+   string app_service_name = 3;
+   ApplicationType app_type = 4;
+}
+message ConnectionStats {
+    uint64 start = 1;
+    uint64 end = 2;
+    string src_ip = 3;
+    string dst_ip = 4;
+    repeated string src_hostnames = 5;
+    repeated string dst_hostnames = 6;
+    uint32 src_port = 7;
+    uint32 dst_port = 8;
+    uint32 protocol = 9;
+    uint64 bytes = 10;
+    uint64 packets = 11;
+    uint64 dropped_bytes = 12;
+    uint64 dropped_packets = 13;
+    string drop_reason = 14;
+    uint32 ip_class_of_service = 15;
+    // This is present only when the data source is INT.
+    ConnectionPath path = 16;
+    LatencyStats path_latency = 17;
+    // These are present only when the data source is IPFIX.
+    // dps path latency is in microseconds
+    Stats dps_path_latency = 18;
+    Stats dps_path_loss_rate = 19;
+    LatencyStats latency = 20;
+    string ingress_interface = 21;
+    string egress_interface = 22;
+    string device_id = 23;
+    string sub_device_id = 24;
+    bool fragmented = 25;
+    TunnelType tunnel_type = 26;
+    uint64 tunnel_id = 27;
+    string user_identity = 28;
+    string vrf_name = 29;
+    string application_name = 30;
+    string app_category_name = 31;
+    string app_service_name = 32;
+    string avt_name = 33;
+    string dps_path_group = 34;
+    string dps_path_local_interface = 35;
+    string dps_path_local_secondary_ip = 36;
+    string dps_path_remote_device_id = 37;
+    string dps_path_remote_interface = 38;
+    string dps_path_remote_secondary_ip = 39;
+    repeated Application applications = 40;
+}
+message ConnectionPath {
+    repeated Node nodes = 2;
+}
+message Node {
+    string device_id = 1;
+    string ingress_interface = 2;
+    string egress_interface = 3;
+    uint32 egress_queue_id = 4;
+    uint32 ttl = 5;
+    LatencyStats latency = 6;
+}
+message Datum {
+    uint64 start = 1;
+    uint64 end = 2;
+    uint64 bytes = 3;
+    uint64 packets = 4;
+    uint64 dropped_bytes = 5;
+    uint64 dropped_packets = 6;
+    uint64 flows = 7;
+    uint64 active_hosts = 8;
+    // dps path latency is in microseconds
+    Stats dps_path_latency = 9;
+    Stats dps_path_loss_rate = 10;
+    LatencyStats latency = 11;
+}
+message FlowFilter {
+    uint64 start = 1;
+    uint64 end = 2;
+    string flow_domain = 3;
+    repeated string dst_types = 4 [deprecated = true];
+    repeated string src_types = 5 [deprecated = true];
+    message Criteria {
+        repeated uint32 dst_ports = 1;
+        repeated uint32 src_ports = 2;
+        repeated string dst_ips = 3;
+        repeated string src_ips = 4;
+        repeated uint32 protocols = 5;
+        repeated string interfaces = 6;
+        repeated string ingress_interfaces = 7;
+        repeated string egress_interfaces = 8;
+        repeated uint64 tunnel_ids = 9;
+        repeated string user_identity = 10;
+        repeated string vrf_name = 11;
+        repeated uint32 ip_class_of_service = 12;
+        // The following three app fields are deprecated and for caravan backward
+        // compatability only. New field dpi_applications should be used for caravan
+        repeated string application_names = 13 [deprecated = true];
+        repeated string app_category_names = 14 [deprecated = true];
+        repeated string app_service_names = 15 [deprecated = true];
+        repeated string avt_names = 16;
+        repeated string dps_path_groups = 17;
+        repeated string dps_path_local_interfaces = 18;
+        repeated string dps_path_remote_device_ids = 19;
+        repeated string dps_path_remote_interfaces = 20;
+        // The app_type in Application is ignored for the following three fields.
+        // It's the same as the field name.
+        repeated Application src_applications = 21;
+        repeated Application dst_applications = 22;
+        repeated Application dpi_applications = 23;
+    }
+    // If this is set, then interfaces, ingress_interfaces, egress_interfaces
+    // in the Criteria and device_id, device_ids should be empty.
+    // This is only valid for IPFIX datasource
+   message DeviceInterface {
+        string device_id = 1;
+        string sub_device_id = 2;
+        string ingress_interface = 3;
+        string egress_interface = 4;
+    }
+    Criteria include = 6;
+    Criteria exclude = 7;
+    bool bidirectional = 8;
+    // `device_id` is deprecated, please use `device_ids` instead
+    string device_id = 9 [deprecated = true];
+    // multiple device ids is not supported for INT datasource
+    repeated string device_ids = 10;
+    bool is_private = 11;
+    bool is_public = 12;
+    // Option: scale byte and packet counters by sampling rate
+    bool scale_counters = 13;
+    bool fragmented = 14;
+    bool outer = 15;
+    TunnelType tunnel_type = 16;
+    // Unlike other repeated fields in FlowFilter, the semantics of repeated latency
+    // is to AND the list of values. A range operator can be implemented as LE and GE
+    // of the same latency metric.
+    repeated OperatorMetric dps_path_latencies = 17;
+    repeated OperatorMetric dps_path_loss_rates = 18;
+    repeated OperatorMetric latencies = 19;
+    // Source of Flow data.
+    FlowDataSource data_source = 20;
+	// First device reports a flow
+	bool ingress_edge_device = 21;
+    bool egress_edge_device = 22;
+    repeated DeviceInterface device_interfaces = 23;
+}
+message DapperFlowFilter {
+    uint64 start = 1;
+    uint64 end = 2;
+    message Criteria {
+        repeated uint32 dst_ports = 1;
+        repeated uint32 src_ports = 2;
+        repeated string dst_ips = 3;
+        repeated string src_ips = 4;
+        // The app_type in Application is ignored for the following two fields.
+        // It's the same as the field name.
+        repeated Application src_applications = 5;
+        repeated Application dst_applications = 6;
+    }
+    Criteria include = 3;
+    Criteria exclude = 4;
+    bool bidirectional = 5;
+    bool is_private = 6;
+    bool is_public = 7;
+    // Unlike other repeated fields in DapperFlowFilter, the semantics of repeated rtt
+    // is to AND the list of values. A range operator can be implemented as LE and GE
+    // of the same rtt metric.
+    repeated OperatorMetric rtts = 8;
+}
+message SamplingRate {
+    uint32 size = 1;
+    uint32 population = 2;
+}
+message TimeSeries {
+    repeated Datum data = 1;
+    string src_type = 2 [deprecated = true];
+    string dst_type = 3 [deprecated = true];
+    string src_ip = 4;
+    string dst_ip = 5;
+    repeated string src_hostnames = 6;
+    repeated string dst_hostnames = 7;
+    uint32 src_port = 8;
+    uint32 dst_port = 9;
+    uint32 protocol = 10;
+    bool is_private = 11;
+    uint64 tunnel_id = 12;
+    string ingress_interface = 13;
+    string egress_interface = 14;
+    string drop_reason = 15;
+    string user_identity = 16;
+    string vrf_name = 17;
+    string application_name = 18;
+    string app_category_name = 19;
+    string app_service_name = 20;
+    repeated Application applications = 21;
+    string avt_name = 22;
+    string dps_path_group = 23;
+    uint32 ip_class_of_service = 24;
+}
+message FlowStats {
+    string src_type = 1 [deprecated = true];
+    string dst_type = 2 [deprecated = true];
+    string src_ip = 3;
+    string dst_ip = 4;
+    repeated string src_hostnames = 5;
+    repeated string dst_hostnames = 6;
+    uint32 src_port = 7;
+    uint32 dst_port = 8;
+    uint32 protocol = 9;
+    bool is_private = 10;
+    bool fragmented = 11;
+    string device_id = 12;
+    string sub_device_id = 13;
+    string ingress_interface = 14;
+    string egress_interface = 15;
+    uint64 bytes = 16;
+    uint64 packets = 17;
+    uint64 dropped_bytes = 18;
+    uint64 dropped_packets = 19;
+    string drop_reason = 20;
+    uint32 ip_class_of_service = 21;
+    uint64 flows = 22;
+    uint64 tunnel_id = 23;
+    LatencyStats latency = 24;
+    string user_identity = 25;
+    string vrf_name = 26;
+    string application_name = 27;
+    string app_category_name = 28;
+    string app_service_name = 29;
+    string avt_name = 30;
+    string dps_path_group = 31;
+    // dps path latency is in microseconds
+    Stats dps_path_latency = 32;
+    Stats dps_path_loss_rate = 33;
+    repeated Application applications = 34;
+}
+message Stats {
+    uint32 min = 1;
+    uint32 max = 2;
+    uint32 avg = 3;
+}
+message LatencyStats {
+    uint32 min_latency_nanos = 1;
+    uint32 max_latency_nanos = 2;
+    uint32 avg_latency_nanos = 3;
+    bool   congestion = 4;
+}
+message ConnectionStatsRequest {
+    FlowFilter filter = 1;
+    // Flow fields to sort by.
+    repeated SortMetric sort_by = 2;
+    // Limit number of results.
+    uint32 limit = 3;
+    uint32 offset = 4;
+}
+message ConnectionStatsResponse {
+    repeated ConnectionStats connection_stats = 1;
+}
+message AggregateTimeSeriesRequest {
+    FlowFilter filter = 1;
+    // Duration of aggregation windows.
+    uint64 aggregation_interval = 2;
+    // Metrics by which to sort time series.
+    repeated SortMetric sort_by = 3;
+    // Fields set to true will be used to group.
+    bool src_ip = 4;
+    bool dst_ip = 5;
+    bool src_port = 6;
+    bool dst_port = 7;
+    bool protocol = 8;
+    bool is_private = 9;
+    bool tunnel_id = 10;
+    bool ingress_interface = 11;
+    bool egress_interface = 12;
+    bool drop_reason = 13;
+    bool user_identity = 14;
+    bool vrf_name = 15;
+    bool application_name = 16;
+    bool app_category_name = 17;
+    bool app_service_name = 18;
+    bool src_app = 19;
+    bool dst_app = 20;
+    bool dpi_app = 21;
+    bool avt_name = 22;
+    bool dps_path_group = 23;
+    bool ip_class_of_service = 24;
+}
+message AggregateTimeSeriesResponse {
+    repeated TimeSeries time_series = 1;
+}
+message BreakdownRequest {
+    FlowFilter filter = 1;
+    repeated SortMetric sort_by = 2;
+    uint32 limit = 3;
+    uint32 offset = 4;
+    bool with_totals = 5;
+    // This field should be used only for UNO/Caravan use cases with ingress_edge_device filtering.
+    // True means not to group by device id.
+    bool aggregate_devices = 6;
+    // Fields set to true will be used to group.
+    bool src_ip = 7;
+    bool vlan_id = 8;
+    bool src_port = 9;
+    bool dst_port = 10;
+    bool protocol = 11;
+    bool is_private = 12;
+    bool fragmented = 13;
+    bool tunnel_id = 14;
+    bool ingress_interface = 15;
+    bool egress_interface = 16;
+    bool drop_reason = 17;
+    bool user_identity = 18;
+    bool vrf_name = 19;
+    bool ip_class_of_service = 20;
+    bool application_name = 21;
+    bool app_category_name = 22;
+    bool app_service_name = 23;
+    bool src_app = 24;
+    bool dst_app = 25;
+    bool dpi_app = 26;
+    bool avt_name = 27;
+    bool dps_path_group = 28;
+    bool deduplicate = 29;
+    bool dst_ip = 30;
+}
+message BreakdownResponse {
+    repeated FlowStats entries = 1;
+}
+message TopResponse {
+    uint64 start = 1;
+    uint64 end = 2;
+    repeated FlowStats groups = 3;
+}
+message SamplingRateRequest {
+    FlowFilter filter = 1;
+}
+message SamplingRateResponse {
+    SamplingRate min = 1;
+    SamplingRate max = 2;
+}
+message CountRequest {
+    FlowFilter filter = 1;
+    // Fields set to true will be used to group.
+    bool src_ip = 2;
+    bool dst_ip = 3;
+    bool src_port = 4;
+    bool dst_port = 5;
+    bool protocol = 6;
+    bool is_private = 7;
+    bool tunnel_id = 8;
+    bool drop_reason = 9;
+    bool ip_class_of_service = 10;
+    bool user_identity = 11;
+    bool vrf_name = 12;
+    bool application_name = 13;
+    bool app_category_name = 14;
+    bool app_service_name = 15;
+    bool src_app = 16;
+    bool dst_app = 17;
+    bool dpi_app = 18;
+    bool avt_name = 19;
+    bool dps_path_group = 20;
+}
+message CountResponse {
+    uint64 count = 1;
+}
+message HostnamesRequest {
+    uint64 start = 1;
+    uint64 end = 2;
+    string query = 3;
+    uint32 limit = 4;
+    string device_id = 5;
+}
+message HostnamesResponse {
+    message HostResult {
+        uint64 update_time = 1;
+        string hostname = 2;
+        string ip = 3;
+        uint32 position = 4;
+        string device_id = 5;
+    }
+    repeated HostResult hosts = 1;
+}
+message AppStatsRequest {
+    option deprecated = true;
+    FlowFilter filter = 1;
+    repeated SortMetric sort_by = 2;
+    uint32 limit = 3;
+    uint32 offset = 4;
+    // Fields set to true will be used to group.
+    bool application_name = 5;
+    bool app_category_name = 6;
+    bool app_service_name = 7;
+    bool src_ip = 8;
+    bool dst_ip = 9;
+}
+message AppStatsResponse {
+    option deprecated = true;
+    message AppStats {
+        option deprecated = true;
+        string src_ip = 1;
+        string dst_ip = 2;
+        repeated Application src_application = 3;
+        repeated Application dst_application = 4;
+        // Number of bytes and packets sent by the source application.
+        uint64 src_bytes = 5;
+        uint64 src_packets = 6;
+        // Number of bytes and packets received by the destination application.
+        uint64 dst_bytes = 7;
+        uint64 dst_packets = 8;
+        uint64 flows = 9;
+        // The latency value is:
+        //   Average per-switch latency, if data source is IPFIX
+        //   Average Path latency, if data source is INT
+        uint32 avg_latency_nanos = 10;
+    }
+    repeated AppStats entries = 1;
+}
+message DapperStatsRequest {
+    DapperFlowFilter filter = 1;
+    repeated SortMetric sort_by = 2;
+    uint32 limit = 3;
+    uint32 offset = 4;
+    // Fields set to true will be used to group.
+    bool application_name = 5;
+    bool app_category_name = 6;
+    bool app_service_name = 7;
+    bool src_ip = 8;
+    bool dst_ip = 9;
+    bool src_port = 10;
+    bool dst_port = 11;
+    bool is_private = 12;
+    bool src_app = 13;
+    bool dst_app = 14;
+}
+message DapperStatsResponse {
+    message DapperStats {
+        string src_ip = 1;
+        string dst_ip = 2;
+        uint32 src_port = 3;
+        uint32 dst_port = 4;
+        bool is_private = 5;
+        repeated Application applications = 6;
+        uint64 flows = 7;
+        uint32 avg_rtt = 8;
+        uint32 min_rtt = 9;
+        uint32 max_rtt = 10;
+    }
+    repeated DapperStats entries = 1;
+}
+service Clover {
+    // Get stats for each unique connection in a given time window.
+    rpc GetConnectionStats (ConnectionStatsRequest) returns (ConnectionStatsResponse);
+    // Get a time series summarizing connections in a given time window.
+    rpc GetAggregateTimeSeries (AggregateTimeSeriesRequest) returns (AggregateTimeSeriesResponse);
+    // Get metrics broken down by fields.
+    rpc GetBreakdown (BreakdownRequest) returns (BreakdownResponse);
+    // StreamTop streams out the top N groups.
+    rpc StreamTop (BreakdownRequest) returns (stream TopResponse);
+    // Get a summary of sampling rate in a given time window.
+    rpc GetSamplingRate (SamplingRateRequest) returns (SamplingRateResponse);
+    // Get the number of unique groups. If no grouping is specified, get the number of flow records.
+    rpc GetCount (CountRequest) returns (CountResponse);
+    // Text search hostnames. Return corresponding IP addresses for any matches.
+    rpc GetHostnames (HostnamesRequest) returns (HostnamesResponse);
+    // Get Flow stats between Source and Destination Applications.
+    rpc GetSrcDstAppStats (AppStatsRequest) returns (AppStatsResponse){
+        option deprecated = true;
+      };
+    // Get Dapper Stats.
+    rpc GetDapperStats (DapperStatsRequest) returns (DapperStatsResponse);
+}

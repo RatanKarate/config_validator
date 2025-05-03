@@ -26,9 +26,7 @@ AUTH_TOKEN = metadata.get("access_token", None)
 # Constants
 timeout = 30
 cv_server = "www.cv-staging.corp.arista.io:443"
-# print(os.getenv("ACCESS_TOKEN"))
-# AUTH_TOKEN = os.getenv("ACCESS_TOKEN") # "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOjQyOTcyMDkzMzUsImRzbiI6InVuby1hdmQiLCJkc3QiOiJhY2NvdW50IiwiZXhwIjoxNzQ1OTUxNDAwLCJpYXQiOjE3NDUzMTM4MjksIm9naSI6MjgyOTk3OCwib2duIjoidW5vLWRlbW8iLCJzaWQiOiI1ZDYyYWNhMWUwNDRjNjA0ZWNjY2Q4OTA1YWM3NmUwNjJlZDkxZTZjNWI1Y2EzODAxNmI2ZjI0ODJlMWJlMTM1LTJNc2tnOERkazJDNjE3aml4MkVsd0prR2s3SUFjcmlxUi1SclEwc1gifQ.f-3Hp-GA8mKxyYM9S7OD0mHEaIBG_-MFOHvkBBIE5Z63JiNORNv7G11WHDYCdSwspyO-noTrVZ6E91o01kfq2Q" #TODO
-# ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+# AUTH_TOKEN = os.getenv("ACCESS_TOKEN") 
 from cvprac.cvp_client import CvpClient
 
 # Initialize the CVP client

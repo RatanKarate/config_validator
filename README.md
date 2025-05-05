@@ -86,12 +86,62 @@ These values are saved to:
 ~/.config/config_validator/metadata.json
 ```
 
+---
+
+### 🔐 Providing the Access Token
+
+The **Config Validator** requires an access token to authenticate API calls to the gRPC backend. You can provide this token in **one of three ways**, listed below in order of **priority**:
+
+#### ✅ 1. Command-Line Argument (Highest Priority)
+
+```bash
+validate-config <access_token> <host_vars_path> <structured_config_path>
+```
+
+- Overrides all other sources.
+- Saves values to `metadata.json`.
+
+#### ✅ 2. `token.txt` File in Current Directory
+
+- Create a file named `token.txt`:
+  ```bash
+  echo "your_token_here" > token.txt
+  ```
+- Single line, no spaces or breaks.
+- If file exists but is **empty**, you'll be prompted.
+- If valid, token is saved to `metadata.json`.
+
+#### ✅ 3. Saved in Metadata File
+
+If previously provided, the saved token from:
+
+```bash
+~/.config/config_validator/metadata.json
+```
+
+...will be used automatically.
+
+#### ❌ No Token Provided?
+
+If no valid token is found in any source, you'll be prompted to enter it manually. It will be saved for future use.
+
+### 📌 Token Priority Summary
+
+```
+1. Command-line argument            ✅ Highest priority
+2. token.txt in current directory  ✅ Used if CLI not given
+3. metadata.json (saved token)     ✅ Used if above two are missing
+4. Prompt user interactively        ⚠️ Fallback if all else fails
+```
+
+---
+
 ### Subsequent Runs
 
 These saved values are reused. If you want to override them:
 
 ```bash
-validate-config new_host_vars_path new_structured_config_pth new_access_token
+validate-config <new_access_token> <new_host_vars_path> <new_structured_config_path> 
 ```
 
 ---

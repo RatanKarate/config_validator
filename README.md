@@ -46,9 +46,19 @@ python3 -m venv myvenv
 source myvenv/bin/activate
 ```
 
-From the root folder:
+## Installation
+
+To install `config_validator` from source, follow the steps below:
 
 ```bash
+# Clone the config_validator repository from GitHub
+git clone https://github.com/RatanKarate/config_validator.git
+
+# Navigate into the cloned repository directory
+cd config_validator
+
+# Install the package using pip
+# The dot (.) refers to the current directory, which should contain pyproject.toml
 pip install .
 ```
 

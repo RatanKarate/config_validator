@@ -135,8 +135,8 @@ def analyze_vlan_impact(host, vlan_list):
 
 def main():
     metadata = load_metadata()
-    acls_config_dir = metadata.get("host_vars_path")
-    intended_config_dir = metadata.get("intended_config_path")
+    acls_config_dir = metadata.get("host_vars_path", None)
+    intended_config_dir = metadata.get("intended_config_path", None)
     acl_policies = read_yaml_configs(acls_config_dir, 'ip_access_lists')
     interfaces_data = read_interface_data(intended_config_dir )
     vlan_configs = read_yaml_configs(intended_config_dir , 'vlan_interfaces')

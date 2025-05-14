@@ -116,7 +116,7 @@ def get_connection_stats(device_id: str = Path(..., title="Device ID")):
         
         filter=clover_pb2.FlowFilter(
             device_id=device_id,
-            start=int((time.time() - 86400) * 1000),
+            start=int((time.time() - 300) * 1000),
             end=int(time.time() * 1000),
         ),)
     try:

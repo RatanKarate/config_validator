@@ -131,7 +131,15 @@ def main():
         stderr=subprocess.PIPE,
         text=True
     )
-
+    # while True:
+    #     output = server.stdout.readline()
+    #     error = server.stderr.readline()
+    #     if output:
+    #         print("STDOUT:", output.strip())
+    #     if error:
+    #         print("STDERR:", error.strip())
+    #     if not output and not error and server.poll() is not None:
+    #         break
     try:
         if not wait_for_server("http://localhost:8000/docs"):
             print("Server did not start.")

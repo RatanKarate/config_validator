@@ -59,6 +59,11 @@ class CloverStub(object):
                 request_serializer=clover__pb2.DapperStatsRequest.SerializeToString,
                 response_deserializer=clover__pb2.DapperStatsResponse.FromString,
                 )
+        self.GetTCPStats = channel.unary_unary(
+                '/Clover/GetTCPStats',
+                request_serializer=clover__pb2.TCPStatsRequest.SerializeToString,
+                response_deserializer=clover__pb2.TCPStatsResponse.FromString,
+                )
 
 
 class CloverServicer(object):
@@ -127,6 +132,13 @@ class CloverServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetTCPStats(self, request, context):
+        """Get TCP Stats.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_CloverServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -174,6 +186,11 @@ def add_CloverServicer_to_server(servicer, server):
                     servicer.GetDapperStats,
                     request_deserializer=clover__pb2.DapperStatsRequest.FromString,
                     response_serializer=clover__pb2.DapperStatsResponse.SerializeToString,
+            ),
+            'GetTCPStats': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTCPStats,
+                    request_deserializer=clover__pb2.TCPStatsRequest.FromString,
+                    response_serializer=clover__pb2.TCPStatsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -335,5 +352,22 @@ class Clover(object):
         return grpc.experimental.unary_unary(request, target, '/Clover/GetDapperStats',
             clover__pb2.DapperStatsRequest.SerializeToString,
             clover__pb2.DapperStatsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetTCPStats(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Clover/GetTCPStats',
+            clover__pb2.TCPStatsRequest.SerializeToString,
+            clover__pb2.TCPStatsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
